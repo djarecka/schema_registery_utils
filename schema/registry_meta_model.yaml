@@ -1,0 +1,252 @@
+id: https://example.org/schema-registry-utils/meta-model
+name: schema_registry_meta_model
+description: >-
+  Meta-model for the schema registry: defines the registered object types
+  (RegistryClass, RegistryProperty, and related support classes) used to
+  describe classes and data elements that can be registered, versioned,
+  related to each other, and compared for similarity.
+  NOTE: `id` above is a placeholder namespace — replace before publishing.
+
+prefixes:
+  linkml: https://w3id.org/linkml/
+  skos: http://www.w3.org/2004/02/skos/core#
+  prov: http://www.w3.org/ns/prov#
+  screg: https://example.org/schema-registry-utils/
+
+default_prefix: screg
+default_range: string
+
+imports:
+  - linkml:types
+
+# ---------------------------------------------------------------------------
+# Classes
+# ---------------------------------------------------------------------------
+# Only RegistryClass and RegistryProperty (and the support classes they
+# directly depend on: ProvenanceInfo, SkosMapping, Relation) are fully
+# specified right now. Rule, Transform, and ValueSet are stubs: present so
+# the overall model shape is visible, but their slots are intentionally left
+# undefined until that work is scoped.
+
+classes:
+
+  RegistryEntity:
+    abstract: true
+    description: >-
+      Common base for versioned, provenance-tracked objects registered in
+      the schema registry.
+    slots:
+      - id
+      - name
+      - definition
+      - version
+      - provenance
+      - skos_mappings
+
+  RegistryClass:
+    is_a: RegistryEntity
+    description: >-
+      A registered class (object class) representing a concept or entity
+      type in the registry, e.g. "Patient".
+    slots:
+      - properties
+      - relations
+      - parent_class
+      - mixins
+
+  RegistryProperty:
+    is_a: RegistryEntity
+    description: >-
+      A registered property (data element) representing a characteristic
+      or attribute that can be attached to a RegistryClass, e.g. "age".
+    slots:
+      - value_type
+      - units
+
+  ProvenanceInfo:
+    description: >-
+      Structured provenance metadata for a registry entity or action.
+    slots:
+      - created_by
+      - created_at
+      - modified_by
+      - modified_at
+      - derived_from
+      - method
+
+  SkosMapping:
+    description: >-
+      A semantic mapping from a registry entity to an external vocabulary
+      concept (SKOS mapping relation).
+    slots:
+      - mapping_type
+      - target
+
+  Relation:
+    description: >-
+      A directed relationship between two registry entities (classes or
+      properties), so that any object's relations can be retrieved.
+    slots:
+      - id
+      - subject
+      - predicate
+      - object
+      - provenance
+
+  Rule:
+    description: >-
+      STUB — a validation or business rule applicable to one or more
+      registry entities (e.g. min/max value, pattern, required,
+      multivalued constraints on a RegistryProperty). Slots intentionally
+      left undefined; scope TBD.
+
+  Transform:
+    description: >-
+      STUB — a transformation between two RegistryClass definitions.
+      Slots intentionally left undefined; scope TBD.
+
+  ValueSet:
+    description: >-
+      STUB — a controlled set of permissible values, usable as a
+      RegistryProperty value_type. Slots intentionally left undefined;
+      scope TBD.
+
+# ---------------------------------------------------------------------------
+# Slots
+# ---------------------------------------------------------------------------
+slots:
+
+  id:
+    identifier: true
+    required: true
+    range: uriorcurie
+    description: Globally unique identifier for this entity.
+
+  name:
+    range: string
+    required: true
+    description: Human-readable label for this entity.
+
+  definition:
+    range: string
+    required: true
+    description: Human-readable definition of this entity.
+
+  version:
+    range: string
+    required: true
+    description: Version identifier for this entity.
+
+  provenance:
+    range: ProvenanceInfo
+    required: true
+    description: Structured provenance for this entity.
+
+  skos_mappings:
+    range: SkosMapping
+    multivalued: true
+    description: Semantic mappings to external vocabulary concepts.
+
+  properties:
+    range: RegistryProperty
+    multivalued: true
+    description: The set of properties that belong to this class.
+
+  relations:
+    range: Relation
+    multivalued: true
+    description: Relations from this class to other registry entities.
+
+  parent_class:
+    range: RegistryClass
+    description: The class this class inherits from.
+
+  mixins:
+    range: RegistryClass
+    multivalued: true
+    description: Additional classes mixed into this class.
+
+  value_type:
+    range: string
+    required: true
+    description: >-
+      The data type or value range for this property (e.g. a primitive
+      type name, or the id of a ValueSet for enumerated values).
+
+  units:
+    range: string
+    description: Unit of measure for this property's values, if applicable.
+
+  created_by:
+    range: string
+    required: true
+    description: Who or what created this entity.
+
+  created_at:
+    range: datetime
+    required: true
+    description: When this entity was created.
+
+  modified_by:
+    range: string
+    description: Who or what last modified this entity.
+
+  modified_at:
+    range: datetime
+    description: When this entity was last modified.
+
+  derived_from:
+    range: string
+    multivalued: true
+    description: Identifiers of the source(s) this entity was derived from.
+
+  method:
+    range: string
+    description: Free-text description of how this entity/action was carried out.
+
+  subject:
+    range: RegistryEntity
+    required: true
+    description: The entity the relation is from.
+
+  predicate:
+    range: string
+    required: true
+    description: The type of relationship (e.g. isPartOf, isSimilarTo, isDerivedFrom).
+
+  object:
+    range: RegistryEntity
+    required: true
+    description: The entity the relation is to.
+
+  mapping_type:
+    range: SkosMappingTypeEnum
+    description: The kind of SKOS mapping relation this represents.
+
+  target:
+    range: uriorcurie
+    description: The external concept this mapping points to.
+
+# ---------------------------------------------------------------------------
+# Enums
+# ---------------------------------------------------------------------------
+enums:
+
+  SkosMappingTypeEnum:
+    description: The kind of SKOS mapping relation between a registry entity and an external concept.
+    permissible_values:
+      EXACT_MATCH:
+        meaning: skos:exactMatch
+        description: The registry entity is equivalent to the external concept.
+      CLOSE_MATCH:
+        meaning: skos:closeMatch
+        description: The registry entity is sufficiently similar to the external concept.
+      BROAD_MATCH:
+        meaning: skos:broadMatch
+        description: The external concept is broader than the registry entity.
+      NARROW_MATCH:
+        meaning: skos:narrowMatch
+        description: The external concept is narrower than the registry entity.
+      RELATED_MATCH:
+        meaning: skos:relatedMatch
+        description: The registry entity is related to the external concept.

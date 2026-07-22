@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.venv/
+.idea/
+notes_july21.pdf
