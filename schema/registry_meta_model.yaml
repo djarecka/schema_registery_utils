@@ -33,13 +33,15 @@ classes:
   RegistryEntity:
     abstract: true
     description: >-
-      Common base for versioned, provenance-tracked objects registered in
-      the schema registry.
+      Common base for content-addressed, provenance-tracked objects
+      registered in the schema registry. Identity (hash_id) is derived
+      from an entity's content, so there is no separate version slot:
+      a change in content produces a new hash_id, with lineage tracked
+      via provenance.derived_from.
     slots:
-      - id
+      - hash_id
       - name
       - definition
-      - version
       - provenance
       - skos_mappings
 
@@ -87,7 +89,7 @@ classes:
       A directed relationship between two registry entities (classes or
       properties), so that any object's relations can be retrieved.
     slots:
-      - id
+      - hash_id
       - subject
       - predicate
       - object
@@ -116,11 +118,12 @@ classes:
 # ---------------------------------------------------------------------------
 slots:
 
-  id:
+  hash_id:
     identifier: true
     required: true
     range: uriorcurie
-    description: Globally unique identifier for this entity.
+    description: >-
+      Content-hash-derived identifier for this entity (format TBD).
 
   name:
     range: string
@@ -131,11 +134,6 @@ slots:
     range: string
     required: true
     description: Human-readable definition of this entity.
-
-  version:
-    range: string
-    required: true
-    description: Version identifier for this entity.
 
   provenance:
     range: ProvenanceInfo

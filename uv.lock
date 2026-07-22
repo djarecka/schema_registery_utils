@@ -1049,11 +1049,19 @@ dependencies = [
     { name = "linkml-runtime" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "linkml", specifier = ">=1.11.1" },
     { name = "linkml-runtime", specifier = ">=1.11.1" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=9.1.1" }]
 
 [[package]]
 name = "shexjsg"

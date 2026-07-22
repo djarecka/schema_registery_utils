@@ -116,15 +116,14 @@ class SkosMappingTypeEnum(str, Enum):
 
 class RegistryEntity(ConfiguredBaseModel):
     """
-    Common base for versioned, provenance-tracked objects registered in the schema registry.
+    Common base for content-addressed, provenance-tracked objects registered in the schema registry. Identity (hash_id) is derived from an entity's content, so there is no separate version slot: a change in content produces a new hash_id, with lineage tracked via provenance.derived_from.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'abstract': True,
          'from_schema': 'https://example.org/schema-registry-utils/meta-model'})
 
-    id: str = Field(default=..., description="""Globally unique identifier for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
+    hash_id: str = Field(default=..., description="""Content-hash-derived identifier for this entity (format TBD).""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
     name: str = Field(default=..., description="""Human-readable label for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
     definition: str = Field(default=..., description="""Human-readable definition of this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
-    version: str = Field(default=..., description="""Version identifier for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
     provenance: ProvenanceInfo = Field(default=..., description="""Structured provenance for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
     skos_mappings: Optional[list[SkosMapping]] = Field(default=None, description="""Semantic mappings to external vocabulary concepts.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
 
@@ -139,10 +138,9 @@ class RegistryClass(RegistryEntity):
     relations: Optional[list[str]] = Field(default=None, description="""Relations from this class to other registry entities.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryClass']} })
     parent_class: Optional[str] = Field(default=None, description="""The class this class inherits from.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryClass']} })
     mixins: Optional[list[str]] = Field(default=None, description="""Additional classes mixed into this class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryClass']} })
-    id: str = Field(default=..., description="""Globally unique identifier for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
+    hash_id: str = Field(default=..., description="""Content-hash-derived identifier for this entity (format TBD).""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
     name: str = Field(default=..., description="""Human-readable label for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
     definition: str = Field(default=..., description="""Human-readable definition of this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
-    version: str = Field(default=..., description="""Version identifier for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
     provenance: ProvenanceInfo = Field(default=..., description="""Structured provenance for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
     skos_mappings: Optional[list[SkosMapping]] = Field(default=None, description="""Semantic mappings to external vocabulary concepts.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
 
@@ -155,10 +153,9 @@ class RegistryProperty(RegistryEntity):
 
     value_type: str = Field(default=..., description="""The data type or value range for this property (e.g. a primitive type name, or the id of a ValueSet for enumerated values).""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryProperty']} })
     units: Optional[str] = Field(default=None, description="""Unit of measure for this property's values, if applicable.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryProperty']} })
-    id: str = Field(default=..., description="""Globally unique identifier for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
+    hash_id: str = Field(default=..., description="""Content-hash-derived identifier for this entity (format TBD).""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
     name: str = Field(default=..., description="""Human-readable label for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
     definition: str = Field(default=..., description="""Human-readable definition of this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
-    version: str = Field(default=..., description="""Version identifier for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
     provenance: ProvenanceInfo = Field(default=..., description="""Structured provenance for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
     skos_mappings: Optional[list[SkosMapping]] = Field(default=None, description="""Semantic mappings to external vocabulary concepts.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity']} })
 
@@ -193,7 +190,7 @@ class Relation(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://example.org/schema-registry-utils/meta-model'})
 
-    id: str = Field(default=..., description="""Globally unique identifier for this entity.""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
+    hash_id: str = Field(default=..., description="""Content-hash-derived identifier for this entity (format TBD).""", json_schema_extra = { "linkml_meta": {'domain_of': ['RegistryEntity', 'Relation']} })
     subject: str = Field(default=..., description="""The entity the relation is from.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Relation']} })
     predicate: str = Field(default=..., description="""The type of relationship (e.g. isPartOf, isSimilarTo, isDerivedFrom).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Relation']} })
     object: str = Field(default=..., description="""The entity the relation is to.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Relation']} })
