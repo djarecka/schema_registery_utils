@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from schema_registry_utils.hashing import compute_hash_id
+from schema_registry_utils.hashing import assign_hash_id, compute_hash_id
 from schema_registry_utils.models import ProvenanceInfo, RegistryClass, RegistryProperty
 
 PROV_A = ProvenanceInfo(created_by="alice", created_at="2026-01-01T00:00:00")
@@ -156,3 +156,39 @@ def test_class_every_hashed_field_changes_hash(field, other_value):
     a = _class()
     b = _class(**{field: other_value})
     assert compute_hash_id(a) != compute_hash_id(b), f"changing {field!r} did not change the hash"
+
+
+def test_assign_hash_id_sets_hash_id_from_original_content():
+    entity = _property()
+    expected_hash_id = compute_hash_id(entity)
+
+    assign_hash_id(entity)
+
+    assert entity.hash_id == expected_hash_id
+
+
+def test_assign_hash_id_appends_first_four_hex_chars_to_name():
+    entity = _property(name="age")
+    digest = compute_hash_id(entity).split(":", 1)[1]
+
+    assign_hash_id(entity)
+
+    assert entity.name == f"age_{digest[:4]}"
+
+
+def test_assign_hash_id_mutates_in_place_and_returns_same_object():
+    entity = _property()
+
+    result = assign_hash_id(entity)
+
+    assert result is entity
+
+
+def test_assign_hash_id_works_for_class():
+    entity = _class(name="Patient")
+    digest = compute_hash_id(entity).split(":", 1)[1]
+
+    assign_hash_id(entity)
+
+    assert entity.name == f"Patient_{digest[:4]}"
+    assert entity.hash_id.startswith("sha256:")
